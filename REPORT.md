@@ -4,10 +4,10 @@
 defend any of this without your code in front of you. Write only what you
 can actually explain.*
 
-- **Name**:
-- **Student ID**:
-- **Email**:
-- **Group**: [BBADBA 5A | BBADBA 5B | PPLEDBA 5A | BDBA 3A]
+- **Name**: Sophie Jasmine Leonaard
+- **Student ID**: 31860
+- **Email**: sjleo.exstudents2026@student.ie.edu
+- **Group**: PPLEDBA 5A
 
 ## Business problem, and the cost of being wrong
 
