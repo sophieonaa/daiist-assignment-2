@@ -1,0 +1,18 @@
+{
+  "c_fn": 10000.0,
+  "c_tp": 2000.0,
+  "c_tn": 0.0,
+  "c_dispatch_fp": 300.0,
+  "review_minutes": 3.0,
+  "operator_eur_per_hour": 12.0,
+  "overhead_per_review": 0.4,
+  "human_recall": 1.0,
+  "human_specificity": 1.0,
+  "home_fire_per_year": 0.001,
+  "photos_per_day": 4.0,
+  "cameras": 20000,
+  "operator_productive_hours": 7.0,
+  "max_operators": 5.0,
+  "c_review": 1.0,
+  "base_rate": 6.849315068493151e-07
+}

@@ -1,0 +1,16 @@
+{
+  "trained_now": true,
+  "fast_mode": false,
+  "base_model": "yolo11n.pt",
+  "epochs_requested": 25,
+  "patience": 10,
+  "imgsz": 416,
+  "batch": 16,
+  "fraction_of_train_used": 1.0,
+  "seed": 0,
+  "device": "cpu",
+  "ultralytics": "8.4.173",
+  "torch": "2.11.0+cpu",
+  "training_seconds": 5625.6,
+  "weights": "weights\\best.pt"
+}

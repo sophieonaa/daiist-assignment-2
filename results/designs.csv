@@ -1,0 +1,5 @@
+,"EUR per 1,000 photos",EUR per year (fleet),review share,reviews per day,operators needed,false dispatches per day,fires missed per year
+A. do nothing,6.849315068493151,200000.0,0.0,0.0,0.0,0.0,20.0
+B. person checks every photo,1001.3698630136987,29240000.0,1.0,80000.0,571.4285714285714,0.0,0.0
+C. model alone (best cut),6.849315068493151,200000.0,0.0,0.0,0.0,0.0,20.0
+D. model + review band,28.47524471262427,831477.1456086288,0.025424186182113687,2033.934894569095,14.528106389779252,0.0,6.136363636363637

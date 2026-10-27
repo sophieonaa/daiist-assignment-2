@@ -1,0 +1,169 @@
+{
+  "valid": {
+    "map50_all_classes": 0.5980085242264489,
+    "map50_95_all_classes": 0.4596406843614028,
+    "map50_fire_smoke": 0.4061549002282304,
+    "map50_95_fire_smoke": 0.2000705583312561,
+    "per_class": {
+      "None": {
+        "precision": 0.9200705931735665,
+        "recall": 0.9836956521739131,
+        "ap50": 0.9817157722228859,
+        "map50_95": 0.9787809364216964
+      },
+      "fire": {
+        "precision": 0.5318609621962814,
+        "recall": 0.41708542713567837,
+        "ap50": 0.46452566871407436,
+        "map50_95": 0.22689012901476624
+      },
+      "smoke": {
+        "precision": 0.511796893341227,
+        "recall": 0.32057416267942584,
+        "ap50": 0.3477841317423864,
+        "map50_95": 0.17325098764774596
+      }
+    },
+    "confusion": [
+      [
+        181.0,
+        2.0,
+        5.0,
+        8.0
+      ],
+      [
+        0.0,
+        89.0,
+        0.0,
+        69.0
+      ],
+      [
+        0.0,
+        1.0,
+        71.0,
+        61.0
+      ],
+      [
+        3.0,
+        107.0,
+        133.0,
+        0.0
+      ]
+    ],
+    "confusion_labels": [
+      "None",
+      "fire",
+      "smoke",
+      "background"
+    ],
+    "confusion_conf": 0.25
+  },
+  "test": {
+    "map50_all_classes": 0.5815340723108725,
+    "map50_95_all_classes": 0.42712307860071164,
+    "map50_fire_smoke": 0.37869388793564335,
+    "map50_95_fire_smoke": 0.14946541389932763,
+    "per_class": {
+      "None": {
+        "precision": 0.9475150946790868,
+        "recall": 0.9827586206896551,
+        "ap50": 0.9872144410613308,
+        "map50_95": 0.9824384080034797
+      },
+      "fire": {
+        "precision": 0.3856034904346576,
+        "recall": 0.4126984126984127,
+        "ap50": 0.3433787277157181,
+        "map50_95": 0.1640931674320707
+      },
+      "smoke": {
+        "precision": 0.5348094491684415,
+        "recall": 0.3717948717948718,
+        "ap50": 0.4140090481555686,
+        "map50_95": 0.13483766036658457
+      }
+    },
+    "confusion": [
+      [
+        57.0,
+        0.0,
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        29.0,
+        2.0,
+        40.0
+      ],
+      [
+        0.0,
+        1.0,
+        31.0,
+        22.0
+      ],
+      [
+        1.0,
+        33.0,
+        45.0,
+        0.0
+      ]
+    ],
+    "confusion_labels": [
+      "None",
+      "fire",
+      "smoke",
+      "background"
+    ],
+    "confusion_conf": 0.25
+  },
+  "baselines": {
+    "coco_zero_shot": {
+      "map50_fire_smoke": 0.0,
+      "map50_95_fire_smoke": 0.0,
+      "note": "COCO has no fire or smoke class; 'fire hydrant' is not fire."
+    },
+    "predict_nothing": {
+      "map50_fire_smoke": 0.0,
+      "map50_95_fire_smoke": 0.0
+    }
+  },
+  "image_level_comparison": [
+    {
+      "system": "fine-tuned yolo",
+      "AUC": 0.9811547714514836,
+      "recall": 0.9302325581395349,
+      "specificity": 0.9827586206896551,
+      "precision": 0.975609756097561,
+      "accuracy": 0.9603960396039604,
+      "TP": 40,
+      "FN": 3,
+      "FP": 1,
+      "TN": 57
+    },
+    {
+      "system": "COCO zero-shot",
+      "AUC": 0.5,
+      "recall": 0.0,
+      "specificity": 1.0,
+      "precision": null,
+      "accuracy": 0.5742574257425742,
+      "TP": 0,
+      "FN": 43,
+      "FP": 0,
+      "TN": 58
+    },
+    {
+      "system": "always pass (majority/nothing)",
+      "AUC": 0.5,
+      "recall": 0.0,
+      "specificity": 1.0,
+      "precision": null,
+      "accuracy": 0.5742574257425742,
+      "TP": 0,
+      "FN": 43,
+      "FP": 0,
+      "TN": 58
+    }
+  ]
+}

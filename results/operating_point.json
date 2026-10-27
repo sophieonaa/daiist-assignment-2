@@ -1,0 +1,16 @@
+{
+  "selected_on": "valid",
+  "low": 0.45,
+  "high": 1.01,
+  "binary_threshold": 0.445,
+  "max_operators": 5.0,
+  "unconstrained_low": 0.45,
+  "unconstrained_high": 1.01,
+  "valid": {
+    "cost_per_1000": 5.721521956714087,
+    "review_share": 0.0027031797231408332,
+    "operators_needed": 1.5446741275090476,
+    "reviews_per_day": 216.25437785126667,
+    "false_dispatches_per_day": 0.0
+  }
+}
