@@ -1,69 +1,59 @@
 # Assignment 2 Report
-
-*Delete this italic guidance as you fill in each section. You'll be asked to
-defend any of this without your code in front of you. Write only what you
-can actually explain.*
-
 - **Name**: Sophie Jasmine Leonaard
 - **Student ID**: 31860
 - **Email**: sjleo.exstudents2026@student.ie.edu
 - **Group**: PPLEDBA 5A
 
 ## Business problem, and the cost of being wrong
-
-*The decision this model supports, who or what acts on it, and what happens
-when it's wrong in each direction. Be concrete about the asymmetry: which
-mistake is worse, roughly by how much, and why. Everything downstream (your
-threshold, how much you send to a person, which metric you care about) has to trace
-back to this section.*
+FindFire is a fictional firm operating in Madrid that produces fire-detector device. Each camera captures four pictures during the day: morning, noon, afternoon, and evening. For simplicity, we assume that each picture is analyzed independently instead of treating each picture as a video. Each picture finishes with one of the three outcomes. Pass means that nothing is done. Review means that a picture is sent for evaluation to a human operator. Fail means that an emergency service is alerted bypassing any human involvement.
+Positive class is a picture containing a fire or smoke. False negative (FN) means that there is fire or smoke but the picture is classified as safe and a fire is not detected. False positive (FP) means that there is no fire but the system alerts anyway. One real-life FP is sunlight or some other light source resembling flames on a picture.
+The cost of each result is defined as follows. An FN equals to €10,000, and a TP equals to €2,000. The €10,000 figure is based on the estimated area damaged by a fire of 17 square meters at €600 per square meter. The €2,000 figure is based on the 3 square meters of detected fires at the same rate per square meter. The value that is important for the decision-making process is not the value itself, but the difference between the figures, namely €8,000, as that is the amount saved by each successful detection of a fire. The cost of one FP equals to €1. It is the sum of 3 minutes of operator’s work at the rate of €12 per hour ($0.60), plus overheads for another €0.40. The cost of sending the unit without human intervention is assumed to be €300.
+The operator is assumed to have a recall of 0.95 and a specificity of 1.0. The values were chosen due to the fact that when a human operator considers a photo thoroughly, they almost never overlooks fire but may miss some fires (recall = 0.95). On the other hand, the operator is unlikely to call fire when there is no fire in a photo (specificity = 1.0).
+The base rate is computed using statistics on house fires. There are approximately 18,500 house fires annually in Spain, with a population of 19.3 million households, which makes the annual probability of having a fire in any specific house around 0.1%. With each camera capturing 1,460 images annually (4 images × 365 days), the probability of having a fire in a specific image is 0.1% / 1,460, making it 1 in 1.46 million images, or 6.85 × 10⁻⁷.
+These two error categories exert opposing forces. The FN type is much more costly per occurrence (€10,000 against €1) but the FP types occur much more often since practically every photograph does not contain any fire. The threshold thus cannot be determined by examining just one side. The high cost of the FN type makes the threshold low to ensure that more fires are detected. However, the high frequency of negative photographs makes the threshold high to avoid being overloaded with the photographs.
 
 ## Dataset
-
-*Workspace / project / version on Roboflow Universe, and the link. What one
-image represents, what the classes are, and why this dataset actually serves
-the problem above rather than merely resembling it.*
+The data source is Roboflow: https://universe.roboflow.com/cs614proj/fire_smoke_detection-eskmo version 1. Each image in the dataset represents each picture in my problem. There are three classes: none, fire, and smoke. None is not an object. It is the class name of the normal picture without fire, which has only one bounding box covering the whole picture (the median box size is 1.0).
+This is an appropriate dataset since it includes negative images (images without any fire) in its test set, which allows false positives to be calculated. This is important since the performance of the algorithm is defined not only by how well it detects fires but also by how well it is able to remain silent when there is no fire.
+The preprocessing was done by the creators of the dataset. It involves auto-orientation and stretching resize to 640x640. The augmentations done are for the training data alone and involve horizontal and vertical flipping, rotation at 90° and ±28°, shear of ±15°, grayscaling 25% of images, and changes in saturation, brightness, exposure, blur, and noise.
 
 ## What the dataset's composition implies
+The dataset is split into: training 1,812 images (about 604 original photos before augmentation), validation 301 images, and test 101 images. The proportions are about 82%, 14%, and 4%.
+The training set has 747 positive and 1,065 negative photos, validation has 117 positive and 184 negative, and test has 43 positive and 58 negative. In terms of number of class instances, the distribution in the training set is 1,060 None, 1,380 fire, and 1,588 smoke. Counted per class instance, training has 1,060 None, 1,380 fire, and 1,588 smoke. Validation has 184, 199, and 209, while test has 58, 63, and 78 for the three classes respectively. Object size relative to the image is moderate: the median fire box is about 6.4% to 7.9% of the image and the median smoke box is about 7.8% to 9.2%. The percentage of boxes smaller than 1% is stored in results/dataset_stats.json.
 
-*Instances per class, train/val/test sizes, typical object size relative to the
-image. Then the interpretation: which per-class numbers will be too thin to
-trust, whether the test split resembles the images you'd really see, and what
-you therefore can't conclude from your results.*
 
 ## Finetuning and baselines
+This model uses object detection to show where fire or smoke was found, so an operator reviewing a photo can immediately see what the model considers to be fire. The per-photo decision can still be derived from the detector's output by taking the highest confidence among the fire and smoke boxes as the photo's score. The model is YOLO11n, finetuned from a COCO checkpoint.
+The model was trained using 25 epochs and took about 94 minutes. This model does not use 640 pixels and 50 epochs because one epoch at 640 pixels takes about 9 minutes, so 50 epochs would need about 7 hours. All 25 epochs ran, and the best epoch was epoch 24 with a three-class validation mAP50 of 0.607. Because the best epoch is at the end, the model was still improving when training stopped and has not converged.
+The finetuned model detected 40 out of 43 fire images (with recall 0.93) and 57 out of 58 normal images (0.983), using a confidence cutoff of 0.25 on a per-image basis. The precision of the finetuned model was 0.976 and the accuracy was 0.960. Two baselines were run on the same dataset. The COCO model, untrained on fires, detected zero of the fires since COCO has no fire category, only "fire hydrant". The trivial "always safe" baseline detected zero fire images. Accuracy for both is 0.574 on the test set, simply due to the fact that most images are normal. In practice, "always safe" will be correct 99.99993% of the time, which is ideal but totally useless. On bounding box level classification, the finetuned model had an AP50 of 0.379 on the test set, while both baselines scored 0.
 
-*Which model and task (detection or classification) and why. A results table on
-the same test split: your finetuned model, the pretrained COCO model zero-shot,
-and a trivial baseline. What changed, and whether the gap is as large as you
-expected.*
 
 ## Per-class evaluation and failure modes
-
-*Per-class AP50, or per-class precision/recall and the confusion matrix.
-Which class carries the headline number, which one is dragging, and what the
-model actually confuses with what. Show where it breaks, not just that it
-works.*
+Positive classes include fire and smoke. The headline metric is the mean AP50 of the two classes, which is 0.379 on the test set. AP50 indicates box-level detection, where the box needs to be properly located, hence, it is lower than the metrics in section 4 for each photo. If we included the class 'None' in the metric, it would become 0.582, which is confusing because 'None' is not an object and its AP50 is 0.987.
+On the test set, fire has a precision of 0.39 and a recall of 0.41, and smoke has a precision of 0.54 and a recall of 0.37. Precision means how many of the boxes drawn were correct, and recall means how many real objects were found.
+Both classes are weak and neither is clearly the one dragging the result: the order is reversed between validation and test, so no claim is made that one class is harder than the other.
+The confusion matrix at the box level on the test set demonstrates where the failure of the model lies. Regarding the fire class, there were 29 boxes that were true fire boxes, 2 boxes that were actually true smoke boxes, and 40 boxes that were placed on places with no detection at all. On the other hand, for the smoke class, there were 31 boxes that were true smoke boxes, 1 box that was actually true fire box, and 22 boxes that were placed on places with no detection at all. Also, there were 33 fire objects and 45 smoke objects that were not detected at all. It can be stated that the model mostly fails by missing fires or smoke and by placing wrong boxes; in addition, there are only 3 cases when it mistakes fire for smoke.
 
 ## Cost matrix and operating point
-
-*Your euro cost for each kind of error and where each figure came from. The
-base rate you assumed. The cost-against-threshold sweep, and the operating
-point you chose. State the assumption that would most change your answer if it
-were wrong.*
+A false alarm or human review cost is €1. A fire detected late cost €2,000 while a fire undetected cost €10,000, while a normal photo which passed normally cost €0. A unit dispatched incorrectly without any human verification cost €300. The source of these figures is provided in section 1. It is assumed that the operator will detect 95% of the fires, and never cause any false alarms. This assumed fire rate is 1 out of 1.46 million photos.
+The cost calculations are made assuming real fire rate per 1,000 photos, which is 1 in 1.46 million photos, and not based on the 43% fire photos in the test data set. The hit ratio and the false alarm rate of the model are determined from the test or validation photos, and then applied to the realistic photos, which are nearly all normal photos. Just for comparison, doing nothing cost €6.8 per 1,000 photos.
+The threshold, which is the score above which a photo is sent to a person, was chosen by trying many values on the validation set and picking the one with the lowest cost. It was not chosen by taste. The result is then reported on the test set, because the test set has only 101 photos, and choosing a threshold there would depend too much on one or two photos. The chosen operating point is a threshold of about 0.45.
+The obtained cost value is reported as a range between about €5.9 and about €28.7 per 1,000 pictures on validation and test sets respectively, compared to €6.8 for doing nothing. This wide range of cost values arises due to the fact that the threshold value lies just above the score of the highest-scoring normal picture in the validation set, while the same thing happens in the test set to 1 out of 58 normal pictures.
+For sending a photo to a person there is only one threshold (approximately 0.45). The upper threshold, above which the unit would be dispatched without a human, is 0. The dispatch of a unit without a human check is economically reasonable only when false alarms are practically absent, and our data do not confirm that. Thus, the decision of the model without any human involvement is, in reality, equal to not doing anything.
+The assumption which would most affect the answer is the cost of missed fire. If the cost is €4,000 then the system will never be economically better than not doing anything. If it is €10,000, then the system will be cheaper only when false alarms in reality are no more frequent than observed. But if the cost of missed fire is €50,000 then even if false alarms in reality are three times more frequent than observed, the system will still be cheaper.
 
 ## What a person still has to check
-
-*Your two thresholds, and what share of cases they send to a person. How many
-that is per day, how long one takes to check, and how many people that needs.
-Is that realistic? Then your design priced against the three alternatives:
-doing nothing, having a person check everything, and letting the model decide
-on its own.*
+There are two thresholds used in this system. The lower threshold is around 0.45, and all the photos that have values higher than it are submitted to the operator. There is no upper threshold, because no photo can be regarded as a fire based on the criteria discussed in section 6. Around 0.3% of photos is submitted to the operator in the validation set, and 2.5% in the test set.
+Thus, considering a fleet of 2,000 cameras (8,000 photos daily), there would be 22 photos daily in the validation set and 203 photos daily in the test set. With a processing time of 3 minutes for each photo, it comes to 1 hour of work per day on validation set and 10 hours on the test set. If a productive operator can work for 7 hours per day, then it would take 0.15 operators for validation set and 1.45 for test set. Either of these numbers is realistic, since it does not involve many people.
+Four models were considered on the test dataset. Inaction will cost €20,000 per year from the approximately 2 fires per year that will be missed. Manual inspection of every image will miss virtually no fires but requires 8,000 inspections per day and approximately 57 operators and costs €2.9 million per year. Having the model predict on its own will have the same cost as inaction, see Section 6. Reviewing the model predictions, where images above the threshold are reviewed by an operator, will cost approximately €83,700 per year and miss approximately 0.7 fires per year.
+In the test dataset, the reviewing step will cost approximately €74,200 per year in terms of the cost of operators and avoid approximately €10,500 per year in terms of fire damage, therefore will cost approximately €63,700 per year more than inaction. It will make sense only if less than approximately 29 photos per day are sent for review. That is true in validation (approximately 22 photos per day) but not in the test (approximately 203 photos per day). The ratio is not affected by enlarging the fleet.
 
 ## Limitations & next steps
-
-*Real limitations you found, and concretely how you'd address each one with
-more time or data. Not generic hedging.*
+1. Small test set. Only 101 images for testing. One image may affect the result. For further analysis, it is recommended to gather around 800 difficult normal pictures from actual cameras as it will prove much stronger that the false alarm rate is less than 0.5% (600 difficult normal pictures will suffice for it).
+2. Easy normal pictures from the Internet. They are not difficult and not from home cameras so actual false alarm rate is most likely higher. Pictures of fog, steam, sunset and red lights are not included. Those difficult cases can be added into the picture set from actual cameras and test the model on the same camera as the product.
+3. Model still learning. Best Epoch is epoch 24 of 25, meaning that the model was small and trained at low resolution as only CPU could be used. To get a better result, train for more epochs at higher resolution using GPU.
+4. One image as one event. Real fire events can be seen in several consecutive images, and with just 4 images per day, a fire may escape detection for several hours, which contradicts the purpose of early detection. The next step is to set an alarm in the case of several consecutive high scoring images and experiment with frequent image capture.
+5. The cost data comes from renovation prices rather than the actual damage from a fire, injuries are not counted as costs, and the costs of dispatching, namely €300, as well as the number of fire trucks used is an assumption. For further analysis, use actual fire damage data from insurance companies and handle injuries separately.
 
 ## Generative AI use disclosure
-
-*Per the syllabus AI Policy: what you used and how, or "no AI content used."*
+Generative AI tools were used to help with dataset search and selection brainstorming, writing and fixing code in train.ipynb, app.ipynb, and costing.py, explaining key concepts, finding sources, suggesting design options, and formatting the report text. However, all the essential decisions, such as the problem framing, the cost figures, the assumptions about the operator and the fleet, the operating point, and the conclusion were made by the author.
